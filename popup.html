@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
- 
+
   <!-- SETUP SCREEN -->
   <div id="screen-setup" class="screen hidden">
     <div class="header">
@@ -22,9 +22,14 @@
       <label class="field-label">School Code</label>
       <input type="text" id="input-school-token" class="text-input" placeholder="e.g. pvrhs2024" />
       <button id="btn-save-token" class="btn btn-primary">Save & Continue</button>
+      <div id="auth-manage" class="hidden" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+        <label class="field-label">Google Account</label>
+        <p class="setup-desc" style="margin-bottom:8px;">Sign out to re-authenticate or switch accounts.</p>
+        <button id="btn-sign-out" class="btn btn-secondary">Sign Out of Google</button>
+      </div>
     </div>
   </div>
- 
+
   <!-- MAIN SCREEN -->
   <div id="screen-main" class="screen hidden">
     <div class="header">
@@ -37,7 +42,7 @@
         <button id="btn-settings" class="icon-btn" title="Settings">⚙</button>
       </div>
     </div>
- 
+
     <!-- Scraped context -->
     <div class="context-bar" id="context-bar">
       <div class="context-item">
@@ -53,7 +58,7 @@
         <span class="context-value" id="ctx-words">—</span>
       </div>
     </div>
- 
+
     <!-- Google auth prompt (shown on Docs pages when not signed in) -->
     <div id="auth-prompt" class="hidden">
       <div class="auth-prompt-box">
@@ -61,7 +66,7 @@
         <button id="btn-sign-in" class="btn btn-primary">Connect Google Account</button>
       </div>
     </div>
- 
+
     <!-- Text area -->
     <div id="paste-area" class="hidden">
       <div class="paste-notice" id="paste-notice">
@@ -69,7 +74,7 @@
       </div>
       <textarea id="manual-text" class="text-input textarea" placeholder="Paste student submission text here..."></textarea>
     </div>
- 
+
     <!-- Revision history (shown on Docs pages when signed in) -->
     <div id="revision-section" class="hidden">
       <div class="section-header">
@@ -83,7 +88,7 @@
         <div class="empty-state">Click ↺ to check revision history.</div>
       </div>
     </div>
- 
+
     <!-- Baseline selector -->
     <div id="baseline-section">
       <div class="section-header">
@@ -94,16 +99,16 @@
         <div class="empty-state">No baselines saved for this student yet.</div>
       </div>
     </div>
- 
+
     <!-- Action buttons -->
     <div class="action-row">
       <button id="btn-analyze" class="btn btn-primary">Analyze Submission</button>
       <button id="btn-save-baseline" class="btn btn-secondary">Save as Baseline</button>
     </div>
- 
+
     <div id="status-msg" class="status-msg hidden"></div>
   </div>
- 
+
   <!-- RESULTS SCREEN -->
   <div id="screen-results" class="screen hidden">
     <div class="header">
@@ -113,10 +118,10 @@
         <span class="logo-text">Analysis Report</span>
       </div>
     </div>
- 
+
     <div id="results-body"></div>
   </div>
- 
+
   <script src="popup.js"></script>
 </body>
 </html>

@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function bindEvents() {
   document.getElementById('btn-save-token').addEventListener('click', saveSchoolToken);
+  document.getElementById('btn-sign-out').addEventListener('click', signOut);
   document.getElementById('btn-settings').addEventListener('click', () => showScreen('setup'));
   document.getElementById('btn-analyze').addEventListener('click', runAnalysis);
   document.getElementById('btn-save-baseline').addEventListener('click', saveBaseline);
@@ -51,9 +52,20 @@ function bindEvents() {
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
   document.getElementById(`screen-${name}`).classList.remove('hidden');
+  if (name === 'setup' && state.isAuthenticated) {
+    document.getElementById('auth-manage').classList.remove('hidden');
+  }
 }
 
 // ─── Setup ────────────────────────────────────────────────────────────────────
+
+async function signOut() {
+  await chrome.runtime.sendMessage({ action: 'signOut' });
+  state.isAuthenticated = false;
+  updateAuthStatus(false);
+  document.getElementById('auth-manage').classList.add('hidden');
+  setStatus('Signed out of Google.', 'success');
+}
 
 async function saveSchoolToken() {
   const token = document.getElementById('input-school-token').value.trim();
