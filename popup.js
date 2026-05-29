@@ -43,6 +43,7 @@ function bindEvents() {
   document.getElementById('btn-back').addEventListener('click', () => showScreen('main'));
   document.getElementById('btn-sign-in').addEventListener('click', signIn);
   document.getElementById('btn-check-revisions').addEventListener('click', checkRevisions);
+  document.getElementById('btn-playback').addEventListener('click', openPlayback);
 }
 
 // ─── Screen management ────────────────────────────────────────────────────────
@@ -160,6 +161,29 @@ async function readDocContent() {
   } else {
     document.getElementById('paste-area').classList.remove('hidden');
     setStatus('Could not read document automatically. Paste text manually.', 'error');
+  }
+}
+
+async function openPlayback() {
+  if (!state.currentDocId) {
+    setStatus('No document ID found. Open a Google Doc first.', 'error');
+    return;
+  }
+
+  setStatus('Opening playback...', 'info');
+
+  try {
+    const result = await chrome.runtime.sendMessage({ action: 'getAuthToken' });
+    if (!result.token) {
+      setStatus('Please connect your Google account first.', 'error');
+      return;
+    }
+
+    const title = encodeURIComponent(state.assignmentTitle || 'Untitled Document');
+    const url = `https://ai-detector-api-production-64d7.up.railway.app/view/playback?docId=${state.currentDocId}&token=${encodeURIComponent(result.token)}&title=${title}`;
+    chrome.tabs.create({ url });
+  } catch (err) {
+    setStatus('Could not open playback.', 'error');
   }
 }
 

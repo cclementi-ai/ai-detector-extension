@@ -7,8 +7,7 @@ const API_URL = 'https://ai-detector-api-production-64d7.up.railway.app';
 
 const SCOPES = [
   'https://www.googleapis.com/auth/documents.readonly',
-  'https://www.googleapis.com/auth/drive.activity.readonly',
-  'https://www.googleapis.com/auth/drive.readonly'
+  'https://www.googleapis.com/auth/drive.activity.readonly'
 ];
 
 // ─── Auth helpers ─────────────────────────────────────────────────────────────
@@ -215,6 +214,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'deleteBaseline') {
     handleDeleteBaseline(request.payload).then(sendResponse).catch(err => {
       sendResponse({ error: err.message });
+    });
+    return true;
+  }
+
+  if (request.action === 'getAuthToken') {
+    getAuthToken(false).then(token => sendResponse({ token })).catch(() => {
+      sendResponse({ token: null });
     });
     return true;
   }
