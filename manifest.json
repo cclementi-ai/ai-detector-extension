@@ -16,7 +16,8 @@
     "client_id": "585655852429-kcv07ebhtmfpbn4tktg37v56321ivaf4.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/documents.readonly",
-      "https://www.googleapis.com/auth/drive.activity.readonly"
+      "https://www.googleapis.com/auth/drive.activity.readonly",
+      "https://www.googleapis.com/auth/drive.readonly"
     ]
   },
   "host_permissions": [

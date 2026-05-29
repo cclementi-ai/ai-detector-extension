@@ -7,7 +7,8 @@ const API_URL = 'https://ai-detector-api-production-64d7.up.railway.app';
 
 const SCOPES = [
   'https://www.googleapis.com/auth/documents.readonly',
-  'https://www.googleapis.com/auth/drive.activity.readonly'
+  'https://www.googleapis.com/auth/drive.activity.readonly',
+  'https://www.googleapis.com/auth/drive.readonly'
 ];
 
 // ─── Auth helpers ─────────────────────────────────────────────────────────────
