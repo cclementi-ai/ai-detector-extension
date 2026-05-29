@@ -3,6 +3,9 @@
   "name": "AI Writing Detector",
   "version": "1.1.0",
   "description": "Helps teachers identify potential AI-generated student submissions in Google Classroom.",
+  "icons": {
+  "128": "icon128.png"
+},
   "permissions": [
     "activeTab",
     "scripting",
