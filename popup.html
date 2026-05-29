@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Writing Detector</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- SETUP SCREEN -->
+  <div id="screen-setup" class="screen hidden">
+    <div class="header">
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">AI Detector</span>
+      </div>
+      <div class="tagline">by Raab Technologies</div>
+    </div>
+    <div class="setup-body">
+      <p class="setup-desc">Enter a school code to get started. This ties your baselines and analyses to your school.</p>
+      <label class="field-label">School Code</label>
+      <input type="text" id="input-school-token" class="text-input" placeholder="e.g. pvrhs2024" />
+      <button id="btn-save-token" class="btn btn-primary">Save & Continue</button>
+    </div>
+  </div>
+
+  <!-- MAIN SCREEN -->
+  <div id="screen-main" class="screen hidden">
+    <div class="header">
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">AI Detector</span>
+      </div>
+      <div class="header-right">
+        <div id="auth-status" class="auth-status"></div>
+        <button id="btn-settings" class="icon-btn" title="Settings">⚙</button>
+      </div>
+    </div>
+
+    <!-- Scraped context -->
+    <div class="context-bar" id="context-bar">
+      <div class="context-item">
+        <span class="context-label">Student</span>
+        <span class="context-value" id="ctx-student">—</span>
+      </div>
+      <div class="context-item">
+        <span class="context-label">Assignment</span>
+        <span class="context-value" id="ctx-assignment">—</span>
+      </div>
+      <div class="context-item">
+        <span class="context-label">Words</span>
+        <span class="context-value" id="ctx-words">—</span>
+      </div>
+    </div>
+
+    <!-- Google auth prompt (shown on Docs pages when not signed in) -->
+    <div id="auth-prompt" class="hidden">
+      <div class="auth-prompt-box">
+        <div class="auth-prompt-text">Sign in with Google to read documents and check revision history.</div>
+        <button id="btn-sign-in" class="btn btn-primary">Connect Google Account</button>
+      </div>
+    </div>
+
+    <!-- Text area -->
+    <div id="paste-area" class="hidden">
+      <div class="paste-notice" id="paste-notice">
+        📄 Google Docs can't be read directly. Paste the submission text below.
+      </div>
+      <textarea id="manual-text" class="text-input textarea" placeholder="Paste student submission text here..."></textarea>
+    </div>
+
+    <!-- Revision history (shown on Docs pages when signed in) -->
+    <div id="revision-section" class="hidden">
+      <div class="section-header">
+        <span class="section-title">Revision History</span>
+        <button id="btn-check-revisions" class="icon-btn small" title="Check revision history">↺</button>
+      </div>
+      <div id="revision-results" class="revision-results">
+        <div class="empty-state">Click ↺ to check revision history.</div>
+      </div>
+    </div>
+
+    <!-- Baseline selector -->
+    <div id="baseline-section">
+      <div class="section-header">
+        <span class="section-title">Compare against baselines</span>
+        <button id="btn-refresh-baselines" class="icon-btn small" title="Refresh">↺</button>
+      </div>
+      <div id="baseline-list" class="baseline-list">
+        <div class="empty-state">No baselines saved for this student yet.</div>
+      </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="action-row">
+      <button id="btn-analyze" class="btn btn-primary">Analyze Submission</button>
+      <button id="btn-save-baseline" class="btn btn-secondary">Save as Baseline</button>
+    </div>
+
+    <div id="status-msg" class="status-msg hidden"></div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="screen-results" class="screen hidden">
+    <div class="header">
+      <button id="btn-back" class="icon-btn" title="Back">←</button>
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">Analysis Report</span>
+      </div>
+    </div>
+
+    <div id="results-body"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

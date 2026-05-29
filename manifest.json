@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "AI Writing Detector",
+  "version": "1.1.0",
+  "description": "Helps teachers identify potential AI-generated student submissions in Google Classroom.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "identity"
+  ],
+  "oauth2": {
+    "client_id": "585655852429-kcv07ebhtmfpbn4tktg37v56321ivaf4.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/documents.readonly",
+      "https://www.googleapis.com/auth/drive.activity.readonly"
+    ]
+  },
+  "host_permissions": [
+    "https://classroom.google.com/*",
+    "https://docs.google.com/*",
+    "https://ai-detector-api-production-64d7.up.railway.app/*",
+    "https://docs.googleapis.com/*",
+    "https://driveactivity.googleapis.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AI Writing Detector"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://classroom.google.com/*",
+        "https://docs.google.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
