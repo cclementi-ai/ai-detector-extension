@@ -24,20 +24,41 @@ document.addEventListener('DOMContentLoaded', async () => {
   const stored = await chrome.storage.local.get(['school_token']);
   state.schoolToken = stored.school_token || null;
 
-  if (!state.schoolToken) {
-    showScreen('setup');
-  } else {
-    showScreen('main');
-    await loadPageContext();
+  // Always go straight to main screen — school code is derived automatically
+  showScreen('main');
+  await loadPageContext();
+
+  // If we don't have a school_token yet but user is authenticated, derive it now
+  if (!state.schoolToken && state.isAuthenticated) {
+    await deriveSchoolToken();
   }
 
   bindEvents();
 });
 
+async function deriveSchoolToken() {
+  try {
+    const result = await chrome.runtime.sendMessage({ action: 'getUserEmail' });
+    if (result && result.email) {
+      const domain = result.email.split('@')[1] || '';
+      // Use everything before the first dot as the school identifier
+      // e.g. 'pvrhs.org' -> 'pvrhs', 'nutleyschools.org' -> 'nutleyschools'
+      const schoolToken = domain.split('.')[0].toLowerCase();
+      if (schoolToken) {
+        await chrome.storage.local.set({ school_token: schoolToken });
+        state.schoolToken = schoolToken;
+      }
+    }
+  } catch (err) {
+    console.error('Could not derive school token:', err);
+  }
+}
+
 function bindEvents() {
   document.getElementById('btn-save-token').addEventListener('click', saveSchoolToken);
   document.getElementById('btn-sign-out').addEventListener('click', signOut);
   document.getElementById('btn-settings').addEventListener('click', () => showScreen('setup'));
+  document.getElementById('btn-back-to-main').addEventListener('click', () => showScreen('main'));
   document.getElementById('btn-analyze').addEventListener('click', runAnalysis);
   document.getElementById('btn-save-baseline').addEventListener('click', saveBaseline);
   document.getElementById('btn-refresh-baselines').addEventListener('click', loadBaselines);
@@ -52,8 +73,14 @@ function bindEvents() {
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
   document.getElementById(`screen-${name}`).classList.remove('hidden');
-  if (name === 'setup' && state.isAuthenticated) {
-    document.getElementById('auth-manage').classList.remove('hidden');
+  if (name === 'setup') {
+    // Pre-fill current school token in the input
+    const input = document.getElementById('input-school-token');
+    if (input && state.schoolToken) input.value = state.schoolToken;
+    // Show auth-manage if signed in
+    if (state.isAuthenticated) {
+      document.getElementById('auth-manage').classList.remove('hidden');
+    }
   }
 }
 
@@ -75,8 +102,7 @@ async function saveSchoolToken() {
   if (!token) return setStatus('Please enter a school code.', 'error');
   await chrome.storage.local.set({ school_token: token });
   state.schoolToken = token;
-  showScreen('main');
-  await loadPageContext();
+  setStatus('School code saved.', 'success');
 }
 
 // ─── Page context ─────────────────────────────────────────────────────────────
@@ -270,6 +296,12 @@ async function signIn() {
     document.getElementById('auth-prompt').classList.add('hidden');
     document.getElementById('revision-section').classList.remove('hidden');
     updateAuthStatus(true);
+
+    // Auto-derive school token from Google email if we don't have one
+    if (!state.schoolToken) {
+      await deriveSchoolToken();
+    }
+
     await readDocContent();
   } else {
     setStatus(`Sign in failed: ${result.error}`, 'error');

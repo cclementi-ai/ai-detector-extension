@@ -18,14 +18,20 @@
       <div class="tagline">by Raab Technologies</div>
     </div>
     <div class="setup-body">
-      <p class="setup-desc">Enter a school code to get started. This ties your baselines and analyses to your school.</p>
-      <label class="field-label">School Code</label>
-      <input type="text" id="input-school-token" class="text-input" placeholder="e.g. pvrhs2024" />
-      <button id="btn-save-token" class="btn btn-primary">Save & Continue</button>
-      <div id="auth-manage" class="hidden" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+      <p class="setup-desc">Settings for AI Writing Detector.</p>
+
+      <!-- School code is hidden from UI but kept for storage logic -->
+      <input type="hidden" id="input-school-token" />
+      <button id="btn-save-token" class="hidden">Save</button>
+
+      <div id="auth-manage" class="hidden">
         <label class="field-label">Google Account</label>
         <p class="setup-desc" style="margin-bottom:8px;">Sign out to re-authenticate or switch accounts.</p>
         <button id="btn-sign-out" class="btn btn-secondary">Sign Out of Google</button>
+      </div>
+
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+        <button id="btn-back-to-main" class="btn btn-secondary">Back</button>
       </div>
     </div>
   </div>

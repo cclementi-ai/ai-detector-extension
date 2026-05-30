@@ -8,7 +8,8 @@ const API_URL = 'https://ai-detector-api-production-64d7.up.railway.app';
 const SCOPES = [
   'https://www.googleapis.com/auth/documents.readonly',
   'https://www.googleapis.com/auth/drive.activity.readonly',
-  'https://www.googleapis.com/auth/drive'
+  'https://www.googleapis.com/auth/drive',
+  'https://www.googleapis.com/auth/userinfo.email'
 ];
 
 // ─── Auth helpers ─────────────────────────────────────────────────────────────
@@ -223,6 +224,26 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     getAuthToken(false).then(token => sendResponse({ token })).catch(() => {
       sendResponse({ token: null });
     });
+    return true;
+  }
+
+  if (request.action === 'getUserEmail') {
+    getAuthToken(false).then(async (token) => {
+      if (!token) return sendResponse({ email: null });
+      try {
+        const response = await fetch('https://www.googleapis.com/oauth2/v1/userinfo', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const info = await response.json();
+          sendResponse({ email: info.email || null });
+        } else {
+          sendResponse({ email: null });
+        }
+      } catch (err) {
+        sendResponse({ email: null });
+      }
+    }).catch(() => sendResponse({ email: null }));
     return true;
   }
 
