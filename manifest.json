@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AI Writing Detector",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Helps teachers identify potential AI-generated student submissions in Google Classroom.",
   "icons": {
   "128": "icon128.png"
@@ -17,7 +17,7 @@
     "scopes": [
       "https://www.googleapis.com/auth/documents.readonly",
       "https://www.googleapis.com/auth/drive.activity.readonly",
-      "https://www.googleapis.com/auth/drive.readonly"
+      "https://www.googleapis.com/auth/drive"
     ]
   },
   "host_permissions": [

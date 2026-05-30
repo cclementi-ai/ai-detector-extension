@@ -7,7 +7,8 @@ const API_URL = 'https://ai-detector-api-production-64d7.up.railway.app';
 
 const SCOPES = [
   'https://www.googleapis.com/auth/documents.readonly',
-  'https://www.googleapis.com/auth/drive.activity.readonly'
+  'https://www.googleapis.com/auth/drive.activity.readonly',
+  'https://www.googleapis.com/auth/drive'
 ];
 
 // ─── Auth helpers ─────────────────────────────────────────────────────────────
@@ -233,17 +234,34 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === 'signIn') {
-    getAuthToken(true).then(token => sendResponse({ success: !!token })).catch(err => {
-      sendResponse({ success: false, error: err.message });
+    // Clear all cached tokens first to force fresh consent screen
+    chrome.identity.clearAllCachedAuthTokens(() => {
+      chrome.identity.getAuthToken({ interactive: true, scopes: SCOPES }, (token) => {
+        if (chrome.runtime.lastError) {
+          sendResponse({ success: false, error: chrome.runtime.lastError.message });
+        } else {
+          sendResponse({ success: !!token });
+        }
+      });
     });
     return true;
   }
 
   if (request.action === 'signOut') {
-    getAuthToken(false).then(token => {
-      if (token) return removeCachedToken(token);
-    }).then(() => sendResponse({ success: true })).catch(() => {
-      sendResponse({ success: true });
+    chrome.identity.getAuthToken({ interactive: false }, (token) => {
+      if (token) {
+        // Revoke with Google's servers first
+        fetch(`https://accounts.google.com/o/oauth2/revoke?token=${token}`)
+          .finally(() => {
+            chrome.identity.clearAllCachedAuthTokens(() => {
+              sendResponse({ success: true });
+            });
+          });
+      } else {
+        chrome.identity.clearAllCachedAuthTokens(() => {
+          sendResponse({ success: true });
+        });
+      }
     });
     return true;
   }

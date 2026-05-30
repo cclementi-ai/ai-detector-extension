@@ -49,37 +49,29 @@ function scrapeGoogleDoc() {
 }
 
 async function readGoogleDocViaClipboard() {
+  // Focus the document editor
+  const editor = document.querySelector('.kix-appview-editor, .docs-texteventtarget-iframe');
+  if (editor) editor.focus();
+
+  // Select all content in the doc
+  document.execCommand('selectAll');
+
+  // Small delay to let selection register
+  await new Promise(r => setTimeout(r, 150));
+
+  // Copy to clipboard
+  document.execCommand('copy');
+
+  // Another small delay
+  await new Promise(r => setTimeout(r, 150));
+
+  // Read from clipboard
   try {
-    // Focus the doc editor
-    const editor = document.querySelector('.kix-appview-editor, [role="textbox"]');
-    if (editor) editor.click();
-
-    await new Promise(r => setTimeout(r, 100));
-
-    // Select all
-    document.execCommand('selectAll');
-
-    await new Promise(r => setTimeout(r, 100));
-
-    // Create a hidden textarea and intercept the copy
-    return new Promise((resolve) => {
-      const handler = (e) => {
-        const text = e.clipboardData.getData('text/plain');
-        document.removeEventListener('copy', handler);
-        e.preventDefault();
-        resolve({ text, success: text.length > 0 });
-      };
-      document.addEventListener('copy', handler);
-      document.execCommand('copy');
-
-      // Timeout fallback
-      setTimeout(() => {
-        document.removeEventListener('copy', handler);
-        resolve({ text: null, success: false, error: 'Timeout' });
-      }, 1000);
-    });
+    const text = await navigator.clipboard.readText();
+    return { text, success: true };
   } catch (err) {
-    return { text: null, success: false, error: err.message };
+    // Fallback — if clipboard API blocked, tell popup to show paste area
+    return { text: null, success: false, error: 'Clipboard access denied' };
   }
 }
 
@@ -92,27 +84,23 @@ function scrapeClassroom() {
     url: window.location.href
   };
 
-  // Assignment title
-  const titleSelectors = ['h1[jsname]', '.Df26Gf', 'h1'];
+  // Assignment title — try multiple selectors (Google changes these classes periodically)
+  const titleSelectors = ['.gb_Vc', '.gb_yd', '.gb_Tc'];
   for (const sel of titleSelectors) {
     const el = document.querySelector(sel);
-    if (el && el.textContent.trim().length > 2) {
+    if (el && el.textContent.trim().length > 2 && el.textContent.trim().length < 100) {
       result.assignment_title = el.textContent.trim();
       break;
     }
   }
 
-  // Student name
-  const studentSelectors = ['.RjsPE', '.YVvGBb', '[data-student-name]'];
-  for (const sel of studentSelectors) {
-    const el = document.querySelector(sel);
-    if (el && el.textContent.trim().length > 1) {
-      result.student_name = el.textContent.trim();
-      break;
-    }
+  // Student name — look for UvCNFb class
+  const studentEl = document.querySelector('.UvCNFb');
+  if (studentEl && studentEl.textContent.trim().length > 1) {
+    result.student_name = studentEl.textContent.trim();
   }
 
-  // Submission text
+  // Submission text — try contenteditable and Quill editor
   const textSelectors = ['.ql-editor', '[contenteditable="true"]'];
   for (const sel of textSelectors) {
     const el = document.querySelector(sel);
@@ -122,8 +110,21 @@ function scrapeClassroom() {
     }
   }
 
-  // Check for embedded Doc iframe
+  // Try to find embedded Google Doc ID from iframes
   if (!result.submission_text) {
+    const iframes = document.querySelectorAll('iframe');
+    for (const iframe of iframes) {
+      const match = iframe.src?.match(/\/document\/d\/([a-zA-Z0-9_-]+)/);
+      if (match) {
+        result.embedded_doc_id = match[1];
+        result.has_embedded_doc = true;
+        break;
+      }
+    }
+  }
+
+  // Check for embedded Doc iframe (fallback flag)
+  if (!result.submission_text && !result.embedded_doc_id) {
     const hasDocFrame = document.querySelector('iframe[src*="docs.google.com"]');
     if (hasDocFrame) result.has_embedded_doc = true;
   }

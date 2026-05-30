@@ -64,7 +64,10 @@ async function signOut() {
   state.isAuthenticated = false;
   updateAuthStatus(false);
   document.getElementById('auth-manage').classList.add('hidden');
-  setStatus('Signed out of Google.', 'success');
+  document.getElementById('revision-section').classList.add('hidden');
+  document.getElementById('paste-area').classList.remove('hidden');
+  document.getElementById('auth-prompt').classList.remove('hidden');
+  setStatus('Signed out. Click Connect Google Account to re-authenticate.', 'info');
 }
 
 async function saveSchoolToken() {
@@ -110,11 +113,18 @@ async function loadPageContext() {
     state.assignmentTitle = data.assignment_title || null;
     state.submissionText = data.submission_text || null;
 
+    // If on Classroom with an embedded doc, capture that doc ID
+    if (isClassroom && data.embedded_doc_id) {
+      state.currentDocId = data.embedded_doc_id;
+    }
+
     document.getElementById('ctx-student').textContent = state.studentName || 'Not detected';
     document.getElementById('ctx-assignment').textContent = state.assignmentTitle || 'Not detected';
 
     if (isDocs) {
       await handleDocsPage();
+    } else if (isClassroom && data.embedded_doc_id) {
+      await handleClassroomEmbeddedDoc();
     } else if (data.has_embedded_doc || !state.submissionText) {
       document.getElementById('paste-area').classList.remove('hidden');
       document.getElementById('ctx-words').textContent = '—';
@@ -130,6 +140,23 @@ async function loadPageContext() {
     document.getElementById('paste-area').classList.remove('hidden');
     document.getElementById('ctx-student').textContent = 'Not detected';
     document.getElementById('ctx-assignment').textContent = 'Not detected';
+  }
+}
+
+async function handleClassroomEmbeddedDoc() {
+  // Check auth status — same flow as Docs page
+  const authResult = await chrome.runtime.sendMessage({ action: 'checkAuth' });
+  state.isAuthenticated = authResult.authenticated;
+
+  if (!state.isAuthenticated) {
+    document.getElementById('auth-prompt').classList.remove('hidden');
+    document.getElementById('paste-area').classList.remove('hidden');
+    document.getElementById('ctx-words').textContent = '—';
+    updateAuthStatus(false);
+  } else {
+    updateAuthStatus(true);
+    document.getElementById('revision-section').classList.remove('hidden');
+    await readDocContent();
   }
 }
 
